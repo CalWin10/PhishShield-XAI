@@ -1,0 +1,528 @@
+openapi: 3.0.3
+info:
+  title: PhishShield XAI API
+  description: Explainable Phishing Investigation Platform Public REST API
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: Current Base API Server
+
+paths:
+  /analyses/url:
+    post:
+      summary: Analyze a URL (Quick or Deep scan)
+      operationId: analyzeUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UrlAnalysisRequest'
+      responses:
+        '200':
+          description: Quick analysis complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResult'
+        '202':
+          description: Deep scan accepted and queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResult'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /analyses/email:
+    post:
+      summary: Analyze pasted email content
+      operationId: analyzeEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailAnalysisRequest'
+      responses:
+        '200':
+          description: Quick email analysis complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResult'
+        '202':
+          description: Deep email analysis accepted and queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResult'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /analyses/email-file:
+    post:
+      summary: Analyze an uploaded .eml file
+      operationId: analyzeEmailFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The raw RFC 822 / MIME .eml file
+                mode:
+                  $ref: '#/components/schemas/ScanMode'
+              required:
+                - file
+      responses:
+        '200':
+          description: EML file analysis complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResult'
+        '202':
+          description: EML deep analysis accepted and queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResult'
+        '400':
+          description: Invalid request or corrupted file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /analyses/{id}:
+    get:
+      summary: Retrieve analysis result by ID
+      operationId: getAnalysisById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique analysis identifier (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Analysis result found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResult'
+        '404':
+          description: Analysis not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /analyses:
+    get:
+      summary: List historical analyses with filtering and pagination
+      operationId: listAnalyses
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+        - name: verdict
+          in: query
+          schema:
+            $ref: '#/components/schemas/Verdict'
+        - name: inputType
+          in: query
+          schema:
+            $ref: '#/components/schemas/InputType'
+      responses:
+        '200':
+          description: Paginated analyses list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAnalyses'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /analyses/{id}/report:
+    get:
+      summary: Download PDF incident investigation report
+      operationId: downloadReport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique analysis identifier (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: PDF incident report generated
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Analysis not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Failed to render PDF report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /analyses/{id}/feedback:
+    post:
+      summary: Submit analyst ground-truth feedback on an investigation
+      operationId: submitFeedback
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique analysis identifier (UUID)
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackRequest'
+      responses:
+        '200':
+          description: Feedback recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackResponse'
+        '404':
+          description: Analysis not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '400':
+          description: Invalid feedback data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+components:
+  schemas:
+    ScanMode:
+      type: string
+      enum: [QUICK, DEEP]
+
+    InputType:
+      type: string
+      enum: [URL, EMAIL, EML]
+
+    AnalysisStatus:
+      type: string
+      enum: [QUEUED, PROCESSING, COMPLETE, FAILED]
+
+    Verdict:
+      type: string
+      enum: [LOW_RISK, SUSPICIOUS, HIGH_RISK, CRITICAL]
+
+    IndicatorCategory:
+      type: string
+      enum: [URL, DOMAIN, TLS, EMAIL, CONTENT, THREAT_INTEL]
+
+    IndicatorSeverity:
+      type: string
+      enum: [INFO, LOW, MEDIUM, HIGH, CRITICAL]
+
+    UrlAnalysisRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          description: The target URL to analyze
+          example: "https://paypa1-security-verification.com/login"
+        mode:
+          $ref: '#/components/schemas/ScanMode'
+          default: QUICK
+
+    EmailAnalysisRequest:
+      type: object
+      required:
+        - body
+      properties:
+        from:
+          type: string
+          description: Sender email address header
+          example: "security@service-paypa1.com"
+        replyTo:
+          type: string
+          description: Reply-To email address header
+          example: "attacker-drop@protonmail.com"
+        subject:
+          type: string
+          description: Subject line of the email
+          example: "Urgent: Verify your account immediately"
+        body:
+          type: string
+          description: Plain text or raw body of the email
+          example: "Please click http://paypa1-security-verification.com/login to restore access."
+        mode:
+          $ref: '#/components/schemas/ScanMode'
+          default: QUICK
+
+    Indicator:
+      type: object
+      required:
+        - code
+        - category
+        - severity
+        - contribution
+        - evidence
+      properties:
+        code:
+          type: string
+          description: Unique programmatic code of the indicator
+          example: "ML_PREDICTION_PHISHING"
+        category:
+          $ref: '#/components/schemas/IndicatorCategory'
+        severity:
+          $ref: '#/components/schemas/IndicatorSeverity'
+        contribution:
+          type: number
+          format: double
+          description: Weighted contribution points to overall risk score
+          example: 65.8
+        evidence:
+          type: string
+          description: Human-readable explainability description
+          example: "pirocheto/phishing-url-detection scored this URL 0.9400 probability of phishing"
+
+    AnalysisResult:
+      type: object
+      required:
+        - analysisId
+        - inputType
+        - mode
+        - status
+        - riskScore
+        - verdict
+        - confidence
+        - modelVersion
+        - indicators
+        - recommendedAction
+        - createdAt
+      properties:
+        analysisId:
+          type: string
+          format: uuid
+          example: "a73cb5b7-7c09-4ce4-8f24-9bbf1b6ebfc0"
+        inputType:
+          $ref: '#/components/schemas/InputType'
+        mode:
+          $ref: '#/components/schemas/ScanMode'
+        status:
+          $ref: '#/components/schemas/AnalysisStatus'
+        normalizedUrl:
+          type: string
+          nullable: true
+          example: "http://paypa1-security-verification.com/login"
+        riskScore:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 88
+        verdict:
+          $ref: '#/components/schemas/Verdict'
+          example: "CRITICAL"
+        confidence:
+          type: number
+          format: double
+          minimum: 0.0
+          maximum: 1.0
+          example: 0.94
+        modelVersion:
+          type: string
+          example: "pirocheto/phishing-url-detection:model.onnx@44f3b19f"
+        latencyMs:
+          type: integer
+          example: 184
+        indicators:
+          type: array
+          items:
+            $ref: '#/components/schemas/Indicator'
+        recommendedAction:
+          type: string
+          example: "BLOCK_AND_QUARANTINE"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-09-01T12:00:00Z"
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-09-01T12:00:00.184Z"
+
+    PaginatedAnalyses:
+      type: object
+      required:
+        - items
+        - totalItems
+        - totalPages
+        - currentPage
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalysisResult'
+        totalItems:
+          type: integer
+          example: 42
+        totalPages:
+          type: integer
+          example: 5
+        currentPage:
+          type: integer
+          example: 0
+
+    FeedbackRequest:
+      type: object
+      required:
+        - actualLabel
+      properties:
+        actualLabel:
+          type: string
+          enum: [PHISHING, LEGITIMATE, UNCERTAIN]
+          example: "PHISHING"
+        comment:
+          type: string
+          nullable: true
+          example: "Confirmed credential harvesting landing page impersonating PayPal."
+
+    FeedbackResponse:
+      type: object
+      required:
+        - feedbackId
+        - analysisId
+        - actualLabel
+        - submittedAt
+      properties:
+        feedbackId:
+          type: string
+          format: uuid
+        analysisId:
+          type: string
+          format: uuid
+        actualLabel:
+          type: string
+        comment:
+          type: string
+          nullable: true
+        submittedAt:
+          type: string
+          format: date-time
+
+    FieldError:
+      type: object
+      required:
+        - field
+        - message
+      properties:
+        field:
+          type: string
+          example: "url"
+        message:
+          type: string
+          example: "Must not be blank"
+
+    ApiError:
+      type: object
+      required:
+        - timestamp
+        - status
+        - code
+        - message
+        - traceId
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-09-01T12:00:00Z"
+        status:
+          type: integer
+          example: 400
+        code:
+          type: string
+          example: "INVALID_REQUEST_PAYLOAD"
+        message:
+          type: string
+          example: "The provided URL is invalid or malformed."
+        fieldErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
+        traceId:
+          type: string
+          example: "trace-91823ab0"

@@ -1,0 +1,45 @@
+{
+  "analysisId": "4a71d803-9d89-4e78-bc5a-e718610738de",
+  "inputType": "EMAIL",
+  "mode": "QUICK",
+  "status": "COMPLETE",
+  "normalizedUrl": "http://billing-update-account.com/action",
+  "riskScore": 68,
+  "verdict": "HIGH_RISK",
+  "confidence": 0.89,
+  "modelVersion": "pirocheto/phishing-url-detection:model.onnx@44f3b19f",
+  "latencyMs": 195,
+  "indicators": [
+    {
+      "code": "ML_PREDICTION_PHISHING",
+      "category": "URL",
+      "severity": "HIGH",
+      "contribution": 45.2,
+      "evidence": "pirocheto/phishing-url-detection scored this URL 0.8220 probability of phishing"
+    },
+    {
+      "code": "EMAIL_HEADER_MISMATCH",
+      "category": "EMAIL",
+      "severity": "HIGH",
+      "contribution": 12.0,
+      "evidence": "Sender domain 'service-paypa1.com' does not match Reply-To domain 'attacker-drop.com'"
+    },
+    {
+      "code": "EMAIL_URGENCY_KEYWORDS",
+      "category": "EMAIL",
+      "severity": "MEDIUM",
+      "contribution": 6.8,
+      "evidence": "Urgency and fear-inducing triggers detected in subject and body ('urgent', 'suspended', '24 hours')"
+    },
+    {
+      "code": "DOMAIN_SUSPICIOUS_KEYWORD",
+      "category": "DOMAIN",
+      "severity": "LOW",
+      "contribution": 4.0,
+      "evidence": "Embedded URL contains suspicious financial/security keywords 'billing-update-account'"
+    }
+  ],
+  "recommendedAction": "BLOCK_AND_QUARANTINE",
+  "createdAt": "2026-09-01T12:00:00Z",
+  "completedAt": "2026-09-01T12:00:00.195Z"
+}

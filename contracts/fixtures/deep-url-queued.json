@@ -1,0 +1,24 @@
+{
+  "analysisId": "e2c34912-4cf1-4563-bb42-a890a8e4cb31",
+  "inputType": "URL",
+  "mode": "DEEP",
+  "status": "QUEUED",
+  "normalizedUrl": "http://secure-account-update.suspicious-domain.tk/auth",
+  "riskScore": 0,
+  "verdict": "LOW_RISK",
+  "confidence": 0.0,
+  "modelVersion": "pirocheto/phishing-url-detection:model.onnx@44f3b19f",
+  "latencyMs": 15,
+  "indicators": [
+    {
+      "code": "DEEP_SCAN_ENQUEUED",
+      "category": "URL",
+      "severity": "INFO",
+      "contribution": 0.0,
+      "evidence": "Deep scan task dispatched to isolated sandboxed inspection worker queue"
+    }
+  ],
+  "recommendedAction": "AWAIT_DEEP_INSPECTION",
+  "createdAt": "2026-09-01T12:00:00Z",
+  "completedAt": null
+}

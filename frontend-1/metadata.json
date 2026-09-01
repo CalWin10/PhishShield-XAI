@@ -1,0 +1,6 @@
+{
+  "name": "PhishShield XAI",
+  "description": "Explainable AI phishing investigation and threat detection platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

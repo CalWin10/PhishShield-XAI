@@ -1,0 +1,165 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: phishshield-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: phishshield
+      POSTGRES_USER: phishshield_user
+      POSTGRES_PASSWORD: phishshield_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U phishshield_user -d phishshield"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - phishshield-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: phishshield-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - phishshield-net
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: phishshield-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: phishshield
+      RABBITMQ_DEFAULT_PASS: phishshield
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - phishshield-net
+
+  ml-service:
+    build:
+      context: ../ml-service
+      dockerfile: Dockerfile
+    container_name: phishshield-ml-service
+    restart: unless-stopped
+    environment:
+      - PORT=8001
+      - HF_REPO_ID=pirocheto/phishing-url-detection
+      - HF_REVISION=44f3b19f705b52532e0aadf3d0d15dd892b8a2fb
+      - MODEL_FILE=model.onnx
+      - DEFAULT_THRESHOLD=0.50
+    expose:
+      - "8001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/internal/v1/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - phishshield-net
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: phishshield-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      ml-service:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/phishshield
+      SPRING_DATASOURCE_USERNAME: phishshield_user
+      SPRING_DATASOURCE_PASSWORD: phishshield_password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: phishshield
+      SPRING_RABBITMQ_PASSWORD: phishshield
+      ML_SERVICE_URL: http://ml-service:8001
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - phishshield-net
+
+  deep-scan-worker:
+    build:
+      context: ../deep-scan-worker
+      dockerfile: Dockerfile
+    container_name: phishshield-deep-scan-worker
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: phishshield
+      RABBITMQ_PASSWORD: phishshield
+      RABBITMQ_QUEUE: deep_scan_queue
+      RABBITMQ_REPLY_QUEUE: deep_scan_results_queue
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: phishshield
+      POSTGRES_USER: phishshield_user
+      POSTGRES_PASSWORD: phishshield_password
+    networks:
+      - phishshield-net
+
+  frontend:
+    build:
+      context: ../frontend-1
+      dockerfile: Dockerfile
+    container_name: phishshield-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8080
+    ports:
+      - "5173:80"
+    networks:
+      - phishshield-net
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  phishshield-net:
+    driver: bridge

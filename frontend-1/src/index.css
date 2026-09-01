@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-dark: #291C0E;
+  --color-brand-medium: #6E473B;
+  --color-brand-light: #A78D78;
+  --color-brand-secondary: #BEB5A9;
+  --color-brand-bg: #E1D4C2;
+
+  --color-brand-dark-hover: #1c1309;
+  --color-brand-medium-hover: #58382e;
+  --color-brand-light-hover: #967c67;
+  --color-brand-secondary-hover: #aba092;
+  --color-brand-bg-subtle: #eae0d0;
+
+  --color-royal-green: #006A4E;
+  --color-royal-green-dark: #005a36;
+  --color-royal-green-light: #d6edde;
+  --color-royal-green-border: #8ec7a4;
+}
+
+:root {
+  --brand-dark: #291C0E;
+  --brand-medium: #6E473B;
+  --brand-light: #A78D78;
+  --brand-secondary: #BEB5A9;
+  --brand-bg: #E1D4C2;
+
+  --background: #E1D4C2;
+  --foreground: #291C0E;
+
+  --royal-green: #006A4E;
+  --royal-green-dark: #005a36;
+}
+
+/* Lenis smooth scrolling rules */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+body {
+  background-color: #E1D4C2;
+  color: #291C0E;
+  font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  text-decoration-line: none;
+  overflow-x: hidden;
+}
+
+/* Eliminate unwanted underlines */
+a, button, p, span, h1, h2, h3, h4, h5, h6 {
+  text-decoration: none !important;
+}
+
+/* Flaviotte-inspired bolder editorial subtext typography */
+.font-subtext, p, .text-sub, .subtext {
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.font-flaviotte {
+  font-family: 'Syne', 'Outfit', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Royal green helper styles */
+.text-royal-green {
+  color: #006A4E;
+}
+
+.bg-royal-green {
+  background-color: #006A4E;
+}
+
+.border-royal-green {
+  border-color: #006A4E;
+}
+
+/* Custom scrollbars matching brand palette */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #E1D4C2;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #BEB5A9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #A78D78;
+}
+
+/* Keyframes for pulse and scan effects */
+@keyframes scan-radar {
+  0% { transform: translateY(-100%); opacity: 0; }
+  50% { opacity: 0.8; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+.radar-beam {
+  animation: scan-radar 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}

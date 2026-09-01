@@ -1,0 +1,51 @@
+.border-glow-wrapper {
+  position: relative;
+  border-radius: inherit;
+  isolation: isolate;
+}
+
+.border-glow-inner {
+  position: relative;
+  border-radius: inherit;
+  z-index: 1;
+  height: 100%;
+}
+
+.border-glow-beam {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.border-glow-beam::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0 340deg,
+    var(--glow-color, #BEB5A9) 360deg
+  );
+  animation: rotate-border 6s linear infinite;
+}
+
+.border-glow-beam::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: inherit;
+  z-index: -1;
+}
+
+@keyframes rotate-border {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "analysisId": "1b93f0b2-32a1-4328-8687-d1a129dcb291",
+  "inputType": "URL",
+  "mode": "QUICK",
+  "status": "COMPLETE",
+  "normalizedUrl": "https://www.google.com/search?q=cybersecurity",
+  "riskScore": 12,
+  "verdict": "LOW_RISK",
+  "confidence": 0.98,
+  "modelVersion": "pirocheto/phishing-url-detection:model.onnx@44f3b19f",
+  "latencyMs": 85,
+  "indicators": [
+    {
+      "code": "ML_PREDICTION_LEGITIMATE",
+      "category": "URL",
+      "severity": "LOW",
+      "contribution": 7.0,
+      "evidence": "pirocheto/phishing-url-detection scored this URL 0.1000 probability of phishing"
+    },
+    {
+      "code": "DOMAIN_ESTABLISHED_REPUTATION",
+      "category": "DOMAIN",
+      "severity": "INFO",
+      "contribution": 5.0,
+      "evidence": "Target domain 'google.com' is a well-known established domain with valid HTTPS certificate"
+    }
+  ],
+  "recommendedAction": "ALLOW",
+  "createdAt": "2026-09-01T12:00:00Z",
+  "completedAt": "2026-09-01T12:00:00.085Z"
+}

@@ -1,0 +1,45 @@
+{
+  "analysisId": "8f3b2075-8651-4ad9-a720-96860d5b0d51",
+  "inputType": "URL",
+  "mode": "QUICK",
+  "status": "COMPLETE",
+  "normalizedUrl": "http://paypa1-security-verification.com/login",
+  "riskScore": 92,
+  "verdict": "CRITICAL",
+  "confidence": 0.96,
+  "modelVersion": "pirocheto/phishing-url-detection:model.onnx@44f3b19f",
+  "latencyMs": 142,
+  "indicators": [
+    {
+      "code": "ML_PREDICTION_PHISHING",
+      "category": "URL",
+      "severity": "CRITICAL",
+      "contribution": 65.8,
+      "evidence": "pirocheto/phishing-url-detection scored this URL 0.9400 probability of phishing"
+    },
+    {
+      "code": "DOMAIN_TYPOSQUATTING",
+      "category": "DOMAIN",
+      "severity": "HIGH",
+      "contribution": 15.0,
+      "evidence": "Target domain 'paypa1-security-verification.com' mimics high-value brand 'paypal'"
+    },
+    {
+      "code": "PATH_CREDENTIAL_KEYWORD",
+      "category": "URL",
+      "severity": "MEDIUM",
+      "contribution": 6.0,
+      "evidence": "URL path contains sensitive authentication keyword '/login'"
+    },
+    {
+      "code": "TLS_INSECURE_SCHEME",
+      "category": "TLS",
+      "severity": "MEDIUM",
+      "contribution": 5.2,
+      "evidence": "URL uses plain HTTP scheme without TLS encryption"
+    }
+  ],
+  "recommendedAction": "BLOCK_AND_QUARANTINE",
+  "createdAt": "2026-09-01T12:00:00Z",
+  "completedAt": "2026-09-01T12:00:00.142Z"
+}
